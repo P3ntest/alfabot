@@ -12,7 +12,7 @@ module.exports = class Asign {
             case 0:
                 const timetable = await getActiveTimetable(msg.author.id, this.db);
                 if (timetable == null) {
-                    msg.channel.send(new Discord.MessageEmbed().setColor("#ff2146").setDescription(":no_entry_sign:  **No timetable set. Use `CREATE TIMETABLE <name>` to create one.**"));
+                    msg.channel.send(new Discord.MessageEmbed().setColor("#ff2146").setDescription(":no_entry_sign:  **No timetable set. Use `CREATE` to create one.**"));
                     this.active = false;
                     return;
                 } else {
@@ -29,7 +29,6 @@ module.exports = class Asign {
             case 1:
                 const subject = msg.content.trim();
                 const subjectActual = await this.db.get("SELECT * FROM subjects WHERE timetable=? AND LOWER(name) LIKE LOWER(?)", [this.timetable, subject]);
-                console.log(`SELECT * FROM subjects WHERE timetable=${this.timetable} AND LOWER(name) LIKE LOWER(${subject})`)
                 if (!subjectActual) {
                     msg.channel.send(new Discord.MessageEmbed().setColor("#ff2146").setDescription(":no_entry_sign:  **Subject not found, please try again. (Use `cancel` to cancel)**"));
                     return;
