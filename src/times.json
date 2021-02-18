@@ -1,0 +1,111 @@
+{
+    "hours": [
+        {
+            "hour": 1,
+            "time": "00 08"
+        },
+        {
+            "hour": 2,
+            "time": "45 08"
+        },
+        {
+            "hour": 3,
+            "time": "45 09"
+        },
+        {
+            "hour": 4,
+            "time": "30 10"
+        },
+        {
+            "hour": 5,
+            "time": "35 11"
+        },
+        {
+            "hour": 6,
+            "time": "20 12"
+        },
+        {
+            "hour": 7,
+            "time": "15 13"
+        },
+        {
+            "hour": 8,
+            "time": "00 14"
+        },
+        {
+            "hour": 9,
+            "time": "45 14"
+        },
+        {
+            "hour": 10,
+            "time": "30 15"
+        },
+        {
+            "hour": 11,
+            "time": "15 16"
+        }
+    ],
+    "days": [
+        {
+            "id": "1",
+            "displayName": "Monday",
+            "names": [
+                "mon",
+                "mo",
+                "1",
+                "montag",
+                "monday"
+            ]
+        },
+        {
+            "id": "2",
+            "displayName": "Tuesday",
+            "names": [
+                "tue",
+                "tu",
+                "2",
+                "dienstag",
+                "tuesday"
+            ]
+        },
+        {
+            "id": "3",
+            "displayName": "Wednesday",
+            "names": [
+                "wed",
+                "wen",
+                "mit",
+                "mi",
+                "we",
+                "wd",
+                "3",
+                "mittwoch",
+                "wednesday"
+            ]
+        },
+        {
+            "id": "4",
+            "displayName": "Thurday",
+            "names": [
+                "thu",
+                "th",
+                "do",
+                "don",
+                "4",
+                "donnerstag",
+                "thurday"
+            ]
+        },
+        {
+            "id": "5",
+            "displayName": "Friday",
+            "names": [
+                "fri",
+                "fr",
+                "5",
+                "freitag",
+                "friday"
+            ]
+        }
+    ]
+}
