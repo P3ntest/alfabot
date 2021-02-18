@@ -87,7 +87,12 @@ client.on('message', async msg => {
                 const embed = new Discord.MessageEmbed();
 
 
-                const { timetable: activeTable } = await db.get("SELECT timetable FROM activeTable WHERE client=?", [msg.author.id])
+                const response = await db.get("SELECT timetable FROM activeTable WHERE client=?", [msg.author.id]);
+                if (!response) {
+                    msg.channel.send(new Discord.MessageEmbed().setColor("#ff2146").setDescription(":no_entry_sign:  **No timetable set. Use `CREATE TIMETABLE <name>` to create one.**"));
+                    return;
+                }
+                const { timetable: activeTable } = response;
                 if (activeTable) {
                     const tableId = activeTable;
                     const tableInfo = await db.get("SELECT * FROM timetables WHERE id=?", [tableId])

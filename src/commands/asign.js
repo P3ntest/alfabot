@@ -12,7 +12,7 @@ module.exports = class Asign {
             case 0:
                 const timetable = await getActiveTimetable(msg.author.id, this.db);
                 if (timetable == null) {
-                    msg.channel.send(new Discord.MessageEmbed().setColor("#ff2146").setDescription(":no_entry_sign:  **No timetable set. Use `CREATE` to create one.**"));
+                    msg.channel.send(new Discord.MessageEmbed().setColor("#ff2146").setDescription(":no_entry_sign:  **No timetable set. Use `CREATE TABLE` to create one.**"));
                     this.active = false;
                     return;
                 } else {
