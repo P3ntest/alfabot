@@ -7,8 +7,6 @@ const secret = require("../secret.json");
 const sqlite3 = require('sqlite3').verbose();
 const { open } = require("sqlite");
 
-// let tempDb = new sqlite3.Database("./info.db", sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => { });
-// tempDb.close();
 var db;
 (async () => {
     db = await open({
@@ -17,7 +15,7 @@ var db;
     })
 
     db.run("CREATE TABLE IF NOT EXISTS timetables (owner TEXT, id TEXT, name TEXT)");
-    db.run("CREATE TABLE IF NOT EXISTS subjects (timetable TEXT, name TEXT, link TEXT)");
+    db.run("CREATE TABLE IF NOT EXISTS subjects (timetable TEXT, name TEXT)");
     db.run("CREATE TABLE IF NOT EXISTS links (client TEXT, link TEXT, timetable TEXT, subject TEXT)");
     db.run("CREATE TABLE IF NOT EXISTS timeentry (hour TEXT, day TEXT, subject TEXT, timetable TEXT)");
     db.run("CREATE TABLE IF NOT EXISTS activeTable (client TEXT, timetable TEXT)");
@@ -170,7 +168,11 @@ async function doCronJob(hour) {
         allClients.forEach(async client => {
             const discordId = client.client;
 
-            const link = (await db.get("SELECT link FROM subjects WHERE timetable=? AND LOWER(name) LIKE LOWER(?)", [entry.timetable, entry.subject])).link;
+            const linkRaw = (await db.get("SELECT link FROM links WHERE timetable=? AND LOWER(subject) LIKE LOWER(?) AND client=?", [entry.timetable, entry.subject, discordId]));
+
+            var link = "";
+            if (linkRaw)
+                link = linkRaw.link;
 
             notifyClient(discordId, entry.subject, link);
         })

@@ -65,9 +65,10 @@ module.exports = class AddSubject {
         if (exists) {
             msg.channel.send(new Discord.MessageEmbed().setColor("#ff2146").setDescription(":no_entry_sign:  **Subject already exists.**"));
         } else {
-            this.db.run("INSERT INTO subjects VALUES (?, ?, ?)", [this.timetable, this.name, link]);
+            this.db.run("INSERT INTO subjects VALUES (?, ?)", [this.timetable, this.name]);
             msg.channel.send(new Discord.MessageEmbed().setColor("#42f554").setDescription(`:white_check_mark: **Created subject ${this.name}.**`));
             if (link != "") {
+                this.db.run("INSERT INTO links VALUES (?, ?, ?, ?)", [msg.author.id, link, this.timetable, this.name]);
                 msg.channel.send(new Discord.MessageEmbed().setColor("#42f554").setDescription(`:white_check_mark: **Set link to ${link}**`));
 
             }
