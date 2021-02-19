@@ -20,6 +20,7 @@ var db;
     db.run("CREATE TABLE IF NOT EXISTS timeentry (hour TEXT, day TEXT, subject TEXT, timetable TEXT)");
     db.run("CREATE TABLE IF NOT EXISTS activeTable (client TEXT, timetable TEXT)");
     db.run("CREATE TABLE IF NOT EXISTS clients (discordId TEXT)");
+    db.run("CREATE TABLE IF NOT EXISTS imported (client TEXT, timetable TEXT)");
 })()
 
 
@@ -103,9 +104,46 @@ client.on('message', async msg => {
                     const tableInfo = await db.get("SELECT * FROM timetables WHERE id=?", [tableId])
                     const tableName = tableInfo.name;
 
+                    const subjects = await db.all("SELECT * FROM subjects WHERE timetable=?", [tableId]);
+                    const links = await db.all("SELECT * FROM links WHERE timetable=? AND client=?", [tableId, msg.author.id]);
 
-                    embed.setColor("#5cd1ff").setTitle("Selected timetable information.").setDescription("This is the information about your currently selected timetable.");
-                    embed.addField("Name", tableName, true);
+                    if (!subjects) subjects = [];
+                    if (!links) links = [];
+
+
+                    embed.setColor("#5cd1ff").setTitle(`Information about *${tableName}*`).setDescription(":notepad_spiral: **" + tableName + "** is currently selected. Use `SWITCH` to change tables.");
+
+                    embed.addField("\u200b", "\u200b");
+
+                    embed.addField("Export Code", `:globe_with_meridians: \`${tableId}\``, true);
+                    embed.addField("Subjects", ":notebook_with_decorative_cover: " + subjects.length, true);
+                    embed.addField("Links", ":link: " + links.length, true);
+
+                    if (subjects.length > 0) {
+                        embed.addField("\u200b", "\u200b");
+                        var subjectsString = "";
+                        subjects.forEach(subject => {
+
+                            let link = undefined;
+
+                            links.forEach(iLink => {
+                                if (iLink.subject == subject.name) {
+                                    link = iLink;
+                                }
+                            });
+
+                            subjectsString += "`" + subject.name + "`";
+
+                            if (link) {
+                                subjectsString += " **-** " + link.link;
+                            }
+                            
+                            subjectsString += "\n";
+                        });
+                        embed.addField("List of all subjects", subjectsString);
+                    }
+
+                    embed.addField("\u200b", "\u200b");
 
                     const table = new Table();
                     table.addRow(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]);
@@ -150,10 +188,11 @@ client.on('message', async msg => {
                     const tableString = table.toString();
 
                     if (tableString.length > 1024) {
+                        embed.addField("Timetable", "\u200b");
                         msg.channel.send(embed);
                         msg.channel.send(tableString);
                     } else {
-                        embed.addField("Table", tableString);
+                        embed.addField("Timetable", tableString);
                         msg.channel.send(embed);
                     }
                 
@@ -174,26 +213,40 @@ client.on('message', async msg => {
 
 function getHelpEmbed() {
     const embed = new Discord.MessageEmbed().setColor("#f5b042").setTimestamp().setTitle("AlfaBot's Help Page")
-        .setDescription("This is a list of all commands.")
         .setThumbnail("https://i.imgur.com/ni1gwxv.png");
 
     embed.setAuthor("Information", "https://i.imgur.com/ni1gwxv.png");
+    embed.setFooter("AlfaBot");
 
-    embed.addField("Usage", " - Commands are not case sensetive.\n - They only work in DMs");
+    //embed.addField("\u200b", "\u200b");
 
-    embed.addField("\u200b", "\u200b");
+    embed.addField("Get Started", "Use `IMPORT` to import a table from someone else or `CREATE TABLE` to create your own.");
 
-    embed.addField("HELP", "Displays this screen.");
-    embed.addField("ADD SUBJECT", "Create a new subject to your timetable with a custom link and name.");
-    embed.addField("ASIGN", "Asign a subject to a certain school hour. Use this to setup your timetable.");
-    embed.addField("CREATE TABLE", "Create a new timetable. You can only have 3!");
-    embed.addField("SWITCH", "Select which table you want to edit and be notified about.");
-    embed.addField("INFO", "View info about the current select timetable.");
-    embed.addField("IMPORT", "Import and use a timetable someone else created.");
-    embed.addField("EXPORT", "View the code someone else can use to import your current timetable. Don't worry, they wont be able to edit it. Links will also not be shared.");
-    embed.addField("FEEDBACK", "Leave feedback for the developer.");
+    embed.addField("General Information", 
+    `AlfaBot helps you with joining the right conference room in time by sending you a reminder with the link 5 minutes prior to your class. ` +
+    `You can also share your tables with other who share the same timetable as you. The table will be duplicated and your links will not be shared.`)
 
     embed.addField("\u200b", "\u200b");
+
+    embed.addField("Command Usage", " - Commands are not case sensetive.\n - Send them directly to this bot. They don't work in servers.");
+
+    embed.addField("\u200b", `
+    \`General\`
+    *HELP* - Displays this screen.
+    *FEEDBACK* - Ask for support, give me feedback or report bugs.
+    *STOP* - Stops reminding you of your classes.
+    *START* - Reactivates reminders.
+    \u200b
+    \`Table Management\`
+    *CREATE TABLE* - Create a new table.
+    *SWITCH* - Switch between your currently active table
+    *INFO* - Display all information about your current table.
+    \u200b
+    \`Publishing\`
+    *IMPORT* - Import a table using an import code.
+    *EXPORT* - Export and share your current table and recieve your export code.`);
+ 
+
 
     return (embed);
 }
