@@ -30,6 +30,7 @@ const UseTable = require('./commands/useTable');
 const Asign = require('./commands/asign');
 const CreateTimeTable = require('./commands/createTimetable');
 const AddSubject = require('./commands/addSubject');
+const Feedback = require('./commands/feedback');
 
 
 
@@ -37,6 +38,7 @@ client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
     client.user.setActivity("ur schools stuff", { type: "WATCHING" })
     //doCronJob(1);
+    global.client = client;
 });
 
 const currentCommands = {};
@@ -81,6 +83,11 @@ client.on('message', async msg => {
                 || msg.content.trim().toLowerCase().startsWith("create subject")) {
                 currentCommands[msg.author.id] = new AddSubject(db);
                 currentCommands[msg.author.id].recieve(msg);
+            } else if (msg.content.trim().toLowerCase().startsWith("feedback")
+                || msg.content.trim().toLowerCase().startsWith("review")
+                || msg.content.trim().toLowerCase().startsWith("support")) {
+                currentCommands[msg.author.id] = new Feedback(db);
+                currentCommands[msg.author.id].recieve(msg);
             } else if (msg.content.toLowerCase().startsWith("info")) {
                 const embed = new Discord.MessageEmbed();
 
@@ -117,15 +124,15 @@ client.on('message', async msg => {
 
 function getHelpEmbed() {
     const embed = new Discord.MessageEmbed().setColor("#f5b042").setTimestamp().setTitle("AlfaBot's Help Page")
-    .setDescription("This is a list of all commands.")
-    .setThumbnail("https://i.imgur.com/ni1gwxv.png");
+        .setDescription("This is a list of all commands.")
+        .setThumbnail("https://i.imgur.com/ni1gwxv.png");
 
     embed.setAuthor("Information", "https://i.imgur.com/ni1gwxv.png");
 
     embed.addField("Usage", " - Commands are not case sensetive.\n - They only work in DMs");
 
     embed.addField("\u200b", "\u200b");
-    
+
     embed.addField("HELP", "Displays this screen.");
     embed.addField("ADD SUBJECT", "Create a new subject to your timetable with a custom link and name.");
     embed.addField("ASIGN", "Asign a subject to a certain school hour. Use this to setup your timetable.");
