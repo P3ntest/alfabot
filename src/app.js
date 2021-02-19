@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const cron = require('node-cron');
-
+const Table = require("./utils/table");
 const secret = require("../secret.json");
 
 const sqlite3 = require('sqlite3').verbose();
@@ -107,7 +107,56 @@ client.on('message', async msg => {
                     embed.setColor("#5cd1ff").setTitle("Selected timetable information.").setDescription("This is the information about your currently selected timetable.");
                     embed.addField("Name", tableName, true);
 
-                    msg.channel.send(embed);
+                    const table = new Table();
+                    table.addRow(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]);
+
+                    var rows = [];
+
+                    for (let row = 1; row < 12; row++) {
+                        const currentRow = [];
+                        for (let day = 1; day < 6; day++) {
+                            const entry = await db.get("SELECT subject FROM timeentry WHERE hour=? AND day=? AND timetable=?", [row, day, tableId]);
+                            console.log(entry);
+                            if (entry) {
+                                currentRow.push(entry.subject);
+                            } else {
+                                currentRow.push("");
+                            }
+                            
+                        }
+                        rows.push(currentRow);
+                    }
+
+                    var lastDay = 0;
+                    var currDay = 0;
+                    rows.forEach(row => {
+                        currDay++;
+                        let contains = false;
+                        row.forEach(el => {
+                            if (el && el != "") {
+                                contains = true;
+                            }
+                        });
+                        if (contains) {
+                            lastDay = currDay;
+                        }
+                    })
+
+                    for (let row = 0; row < lastDay; row++) {
+                        table.addRow(rows[row]);
+                    }
+
+                    const tableString = table.toString();
+
+                    if (tableString.length > 1023) {
+                        msg.channel.send(tableString);
+                        msg.channel.send(embed);
+                    } else {
+                        embed.addField("Table", tableString);
+                        msg.channel.send(embed);
+                    }
+                
+                    
                 } else {
                     msg.channel.send(new Discord.MessageEmbed().setColor("#ff2146").setDescription(":no_entry_sign:  **No timetable set. Use `CREATE TIMETABLE <name>` to create one.**"));
                 }
