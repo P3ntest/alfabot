@@ -116,7 +116,6 @@ client.on('message', async msg => {
                         const currentRow = [];
                         for (let day = 1; day < 6; day++) {
                             const entry = await db.get("SELECT subject FROM timeentry WHERE hour=? AND day=? AND timetable=?", [row, day, tableId]);
-                            console.log(entry);
                             if (entry) {
                                 currentRow.push(entry.subject);
                             } else {
@@ -140,7 +139,9 @@ client.on('message', async msg => {
                         if (contains) {
                             lastDay = currDay;
                         }
-                    })
+                    });
+
+                    if (lastDay < 6) lastDay = 6;
 
                     for (let row = 0; row < lastDay; row++) {
                         table.addRow(rows[row]);
@@ -148,9 +149,9 @@ client.on('message', async msg => {
 
                     const tableString = table.toString();
 
-                    if (tableString.length > 1023) {
-                        msg.channel.send(tableString);
+                    if (tableString.length > 1024) {
                         msg.channel.send(embed);
+                        msg.channel.send(tableString);
                     } else {
                         embed.addField("Table", tableString);
                         msg.channel.send(embed);
