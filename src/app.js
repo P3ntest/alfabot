@@ -20,7 +20,9 @@ var db;
     db.run("CREATE TABLE IF NOT EXISTS timeentry (hour TEXT, day TEXT, subject TEXT, timetable TEXT)");
     db.run("CREATE TABLE IF NOT EXISTS activeTable (client TEXT, timetable TEXT)");
     db.run("CREATE TABLE IF NOT EXISTS clients (discordId TEXT)");
-    db.run("CREATE TABLE IF NOT EXISTS imported (client TEXT, timetable TEXT)");
+    //db.run("CREATE TABLE IF NOT EXISTS imported (client TEXT, timetable TEXT)");
+
+    global.db = db;
 })()
 
 
@@ -32,7 +34,9 @@ const Asign = require('./commands/asign');
 const CreateTimeTable = require('./commands/createTimetable');
 const AddSubject = require('./commands/addSubject');
 const Feedback = require('./commands/feedback');
-
+const ImportCmd = require('./commands/import');
+const RenameCmd = require("./commands/rename");
+const SetLink = require('./commands/setLink');
 
 
 client.on('ready', () => {
@@ -63,7 +67,7 @@ client.on('message', async msg => {
         }
         if (msg.content.trim() == "cancel") {
             currentCommands[msg.author.id] = undefined;
-            msg.channel.send(new Discord.MessageEmbed().setColor("#42f554").setDescription(":white_check_mark: **Command cancelled.**"));
+            msg.react("👍");
         } else if (currentCommands[msg.author.id] && currentCommands[msg.author.id].active) {
             currentCommands[msg.author.id].recieve(msg);
         } else {
@@ -88,6 +92,15 @@ client.on('message', async msg => {
                 || msg.content.trim().toLowerCase().startsWith("review")
                 || msg.content.trim().toLowerCase().startsWith("support")) {
                 currentCommands[msg.author.id] = new Feedback(db);
+                currentCommands[msg.author.id].recieve(msg);
+            } else if (msg.content.trim().toLowerCase().startsWith("import")) {
+                currentCommands[msg.author.id] = new ImportCmd(db);
+                currentCommands[msg.author.id].recieve(msg);
+            } else if (msg.content.trim().toLowerCase().startsWith("rename")) {
+                currentCommands[msg.author.id] = new RenameCmd(db);
+                currentCommands[msg.author.id].recieve(msg);
+            } else if (msg.content.trim().toLowerCase().startsWith("set link")) {
+                currentCommands[msg.author.id] = new SetLink(db);
                 currentCommands[msg.author.id].recieve(msg);
             } else if (msg.content.toLowerCase().startsWith("info")) {
                 const embed = new Discord.MessageEmbed();
@@ -137,7 +150,7 @@ client.on('message', async msg => {
                             if (link) {
                                 subjectsString += " **-** " + link.link;
                             }
-                            
+
                             subjectsString += "\n";
                         });
                         embed.addField("List of all subjects", subjectsString);
@@ -159,7 +172,7 @@ client.on('message', async msg => {
                             } else {
                                 currentRow.push("");
                             }
-                            
+
                         }
                         rows.push(currentRow);
                     }
@@ -195,8 +208,8 @@ client.on('message', async msg => {
                         embed.addField("Timetable", tableString);
                         msg.channel.send(embed);
                     }
-                
-                    
+
+
                 } else {
                     msg.channel.send(new Discord.MessageEmbed().setColor("#ff2146").setDescription(":no_entry_sign:  **No timetable set. Use `CREATE TIMETABLE <name>` to create one.**"));
                 }
@@ -222,9 +235,9 @@ function getHelpEmbed() {
 
     embed.addField("Get Started", "Use `IMPORT` to import a table from someone else or `CREATE TABLE` to create your own.");
 
-    embed.addField("General Information", 
-    `AlfaBot helps you with joining the right conference room in time by sending you a reminder with the link 5 minutes prior to your class. ` +
-    `You can also share your tables with other who share the same timetable as you. The table will be duplicated and your links will not be shared.`)
+    embed.addField("General Information",
+        `AlfaBot helps you with joining the right conference room in time by sending you a reminder with the link 5 minutes prior to your class. ` +
+        `You can also share your tables with other who share the same timetable as you. The table will be duplicated and your links will not be shared.`)
 
     embed.addField("\u200b", "\u200b");
 
@@ -241,11 +254,13 @@ function getHelpEmbed() {
     *CREATE TABLE* - Create a new table.
     *SWITCH* - Switch between your currently active table
     *INFO* - Display all information about your current table.
+    *RENAME* - Rename the current table.
+    *SET LINK* - Set a link for a subject.
     \u200b
     \`Publishing\`
     *IMPORT* - Import a table using an import code.
     *EXPORT* - Export and share your current table and recieve your export code.`);
- 
+
 
 
     return (embed);
