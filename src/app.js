@@ -37,6 +37,7 @@ const Feedback = require('./commands/feedback');
 const ImportCmd = require('./commands/import');
 const RenameCmd = require("./commands/rename");
 const SetLink = require('./commands/setLink');
+const ExportCmd = require('./commands/export');
 
 
 client.on('ready', () => {
@@ -98,6 +99,9 @@ client.on('message', async msg => {
                 currentCommands[msg.author.id].recieve(msg);
             } else if (msg.content.trim().toLowerCase().startsWith("rename")) {
                 currentCommands[msg.author.id] = new RenameCmd(db);
+                currentCommands[msg.author.id].recieve(msg);
+            } else if (msg.content.trim().toLowerCase().startsWith("export")) {
+                currentCommands[msg.author.id] = new ExportCmd(db);
                 currentCommands[msg.author.id].recieve(msg);
             } else if (msg.content.trim().toLowerCase().startsWith("set link")) {
                 currentCommands[msg.author.id] = new SetLink(db);
@@ -255,6 +259,10 @@ function getHelpEmbed() {
     *SWITCH* - Switch between your currently active table
     *INFO* - Display all information about your current table.
     *RENAME* - Rename the current table.
+    \u200b
+    \`Table Configuration\`
+    *CREATE SUBJECT* - Create a subject.
+    *ASIGN* - Asign a subject to a school hour.
     *SET LINK* - Set a link for a subject.
     \u200b
     \`Publishing\`
