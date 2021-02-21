@@ -99,7 +99,7 @@ client.on('message', async msg => {
             } else if (msg.content.toLowerCase().startsWith("delete subject")) {
                 currentCommands[msg.author.id] = new DeleteSubject();
                 currentCommands[msg.author.id].recieve(msg);
-            } else if (msg.content.trim().toLowerCase().startsWith("rename")) {
+            } else if (msg.content.trim().toLowerCase().startsWith("rename table")) {
                 currentCommands[msg.author.id] = new RenameCmd(db);
                 currentCommands[msg.author.id].recieve(msg);
             } else if (msg.content.trim().toLowerCase().startsWith("export")) {
@@ -155,7 +155,7 @@ function getHelpEmbed() {
     *CREATE TABLE* - Create a new table.
     *SWITCH* - Switch between your currently active table
     *INFO* - Display all information about your current table.
-    *RENAME* - Rename the current table.
+    *RENAME TABLE* - Rename the current table.
     \u200b
     \`Table Configuration\`
     *CREATE SUBJECT* - Create a subject.
