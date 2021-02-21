@@ -45,6 +45,7 @@ module.exports = class DeleteSubject {
 
     async deleteSubject(msg, subject) {
         global.db.run("DELETE FROM subjects WHERE name=?", [subject.name]);
+        global.db.run("DELETE FROM links WHERE links.subject=? AND links.client=? AND links.timetable=?", [subject.name, msg.author.id, this.activeTable.timetable]);
         msg.channel.send(new Discord.MessageEmbed().setColor("#42f554").setDescription(":white_check_mark: **Deleted subject.**"));
         return true;
     }
