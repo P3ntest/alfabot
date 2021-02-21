@@ -44,7 +44,6 @@ client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
     client.user.setActivity("AlfaView", { type: "PLAYING" })
     global.client = client;
-    doCronJob(1);
 });
 
 const currentCommands = {};
@@ -240,7 +239,6 @@ times.hours.forEach(async hour => {
 
 async function doCronJob(hour) {
     var day = new Date().getDay();
-    day = 1; //////////do this
 
     const allEntrys = await db.all("SELECT * FROM timeentry WHERE day=? AND hour=?", [day, hour]);
 
