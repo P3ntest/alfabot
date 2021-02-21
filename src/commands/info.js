@@ -28,7 +28,6 @@ module.exports = class InfoCmd {
                     if (!subjects) subjects = [];
                     if (!links) links = [];
 
-
                     embed.setColor("#5cd1ff").setTitle(`Information about *${tableName}*`).setDescription(":notepad_spiral: **" + tableName + "** is currently selected. Use `SWITCH` to change tables.");
 
                     embed.addField("\u200b", "\u200b");
@@ -40,8 +39,11 @@ module.exports = class InfoCmd {
                     if (subjects.length > 0) {
                         embed.addField("\u200b", "\u200b");
                         var subjectsString = "";
-                        subjects.forEach(subject => {
+                        var subjectStrings = [];
+                        for (let i = 0; i < subjects.length; i++) {
+                            const subject = subjects[i];
 
+                            let addedLenght = 11;
                             let link = undefined;
 
                             links.forEach(iLink => {
@@ -52,13 +54,32 @@ module.exports = class InfoCmd {
 
                             subjectsString += "`" + subject.name + "`";
 
+                            addedLenght += subject.name.length + link.link.length;
+
                             if (link) {
                                 subjectsString += " **-** " + link.link;
                             }
 
                             subjectsString += "\n";
-                        });
-                        embed.addField("List of all subjects", subjectsString);
+                        
+                            if (subjectsString.length >= 1024) {
+                                subjectStrings.push(subjectsString.substr(0, subjectsString.length-addedLenght));
+                                subjectsString = "";
+                                i -= 1;
+                            }
+                            
+                        }
+                        
+                        subjectStrings.push(subjectsString);
+
+                        if (subjectStrings.length > 1) {
+                            embed.addField("List of all subjects", subjectStrings[0]);
+                            for (let i = 1; i < subjectStrings.length; i++) {
+                                embed.addField("\u200b", subjectStrings[i]);
+                            }
+                        } else {
+                            embed.addField("List of all subjects", subjectsString);
+                        }
                     }
 
                     embed.addField("\u200b", "\u200b");
