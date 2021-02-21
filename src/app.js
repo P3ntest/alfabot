@@ -203,12 +203,16 @@ async function doCronJob(hour) {
 
 function notifyClient(clientId, subject, link) {
     client.users.fetch(clientId).then(user => {
-        const embed = new Discord.MessageEmbed().setColor("#5cd1ff").setTitle("You have *" + subject + "* in 5 minutes!").setTimestamp()
-            .setThumbnail("https://i.imgur.com/n5ZS0h3.png");
+        const embed = new Discord.MessageEmbed().setColor("#eb4034").setTimestamp().setFooter("AlfaBot")
+            .setAuthor("You have class in 5 minutes!")
+            
+
+        embed.addField("Subject", subject, true);
 
         if (link.trim() != "") {
-            embed.addField("Link", link);
-            embed.setURL(link);
+            embed.addField("Link", link, true);
+            embed.setURL(link)
+            .setTitle("Click here to join.");
         }
 
         user.send(`<@${user.id}>`, embed);
