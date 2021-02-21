@@ -23,6 +23,7 @@ const MotdAdminCommand = require('./commands/motd');
 const UnAsign = require('./commands/unasign');
 const ListTables = require('./commands/listTables');
 const ListSubjectsCmd = require('./commands/listSubjects');
+const GetLink = require('./commands/link');
 
 var db;
 (async () => {
@@ -105,6 +106,9 @@ client.on('message', async msg => {
                 currentCommands[msg.author.id].recieve(msg);
             } else if (msg.content.trim().toLowerCase().startsWith("import")) {
                 currentCommands[msg.author.id] = new ImportCmd(db);
+                currentCommands[msg.author.id].recieve(msg);
+            } else if (msg.content.trim().toLowerCase().startsWith("link")) {
+                currentCommands[msg.author.id] = new GetLink();
                 currentCommands[msg.author.id].recieve(msg);
             } else if (msg.content.toLowerCase().startsWith("delete table")) {
                 currentCommands[msg.author.id] = new DeleteTable();
