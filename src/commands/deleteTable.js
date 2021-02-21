@@ -18,7 +18,7 @@ module.exports = class DeleteTable {
                 }
                 if (msg.content.split(" ").length > 2) {
                     this.name = msg.content.split(" ")[2];
-                    if(this.confirm(msg)) {
+                    if (this.confirm(msg)) {
                         this.active = false;
                     }
                     this.stage = 1;
@@ -35,7 +35,7 @@ module.exports = class DeleteTable {
                 break;
             case 1:
                 this.name = msg.content;
-                if(this.confirm(msg)) {
+                if (this.confirm(msg)) {
                     this.active = false;
                 }
                 break;
@@ -44,14 +44,14 @@ module.exports = class DeleteTable {
 
     async deleteTable(msg, timetable) {
         global.db.run("DELETE FROM timetables WHERE id=?", [timetable.id]);
-            setActiveTimeTable(msg.author.id, "", null)
-            msg.channel.send(new Discord.MessageEmbed().setColor("#42f554").setDescription(":white_check_mark: **Deleted table.**"));
-            return true;
+        setActiveTimeTable(msg.author.id, "", null)
+        msg.channel.send(new Discord.MessageEmbed().setColor("#42f554").setDescription(":white_check_mark: **Deleted table.**"));
+        return true;
     }
 
     async confirm(msg) {
         const timetable = await global.db.get("SELECT * FROM timetables WHERE LOWER (name) LIKE LOWER (?) AND owner = ?", [this.name, msg.author.id]);
-        if(!timetable) {
+        if (!timetable) {
             msg.channel.send(new Discord.MessageEmbed().setColor("#ff2146").setDescription(":no_entry_sign:  **Table not found, please try again. Use `cancel` to cancel.**"));
             return false;
         }
@@ -59,12 +59,12 @@ module.exports = class DeleteTable {
             const message = await msg.channel.send(new Discord.MessageEmbed().setColor("#5cd1ff").setDescription(":question: **Are you sure?**"))
             await message.react("✅");
             await message.react("🟥");
-            message.awaitReactions(() => true, {max: 1, time: 60000})
-            .then(collected => {
-                if (collected.first().emoji.name == "✅") this.deleteTable(msg, timetable);
-                else  msg.channel.send(new Discord.MessageEmbed().setColor("#f5b042").setDescription(":information_source: **Action has been cancelled.**"));
-                message.delete();
-            });
+            message.awaitReactions(() => true, { max: 1, time: 60000 })
+                .then(collected => {
+                    if (collected.first().emoji.name == "✅") this.deleteTable(msg, timetable);
+                    else msg.channel.send(new Discord.MessageEmbed().setColor("#f5b042").setDescription(":information_source: **Action has been cancelled.**"));
+                    message.delete();
+                });
         }
     }
 }
