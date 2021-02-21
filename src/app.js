@@ -160,6 +160,7 @@ function getHelpEmbed() {
     *SWITCH* - Switch between your currently active table
     *INFO* - Display all information about your current table.
     *RENAME TABLE* - Rename the current table.
+    *RENAME SUBJECT* - Rename a subject from the current table.
     *DELETE TABLE* - Delete a table.
     *DELETE SUBJECT* - Delete a subject.
     \u200b
