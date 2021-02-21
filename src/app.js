@@ -18,6 +18,8 @@ const DeleteTable = require('./commands/deleteTable');
 const DeleteSubject = require('./commands/deleteSubject');
 const RenameSubject = require('./commands/renameSubject');
 const RenameTable = require('./commands/renameTable');
+const StartStopCmd = require('./commands/startStop');
+const MotdAdminCommand = require('./commands/motd');
 
 var db;
 (async () => {
@@ -31,7 +33,8 @@ var db;
     db.run("CREATE TABLE IF NOT EXISTS links (client TEXT, link TEXT, timetable TEXT, subject TEXT)");
     db.run("CREATE TABLE IF NOT EXISTS timeentry (hour TEXT, day TEXT, subject TEXT, timetable TEXT)");
     db.run("CREATE TABLE IF NOT EXISTS activeTable (client TEXT, timetable TEXT)");
-    db.run("CREATE TABLE IF NOT EXISTS clients (discordId TEXT)");
+    db.run("CREATE TABLE IF NOT EXISTS clients (discordId TEXT, active BOOLEAN)");
+    //SELECT activeTable.timetable FROM activeTable, clients WHERE activeTable.client=clients.discordId AND clients.active=true
     //db.run("CREATE TABLE IF NOT EXISTS imported (client TEXT, timetable TEXT)");
 
     global.db = db;
@@ -39,8 +42,7 @@ var db;
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
-    client.user.setActivity("ur schools stuff", { type: "WATCHING" })
-    //doCronJob(1);
+    client.user.setActivity("AlfaView", { type: "PLAYING" })
     global.client = client;
 });
 
@@ -50,7 +52,7 @@ async function checkFirstMessage(discordId) {
 
     const row = await db.get("SELECT * FROM clients WHERE discordId=?", [discordId]);
     if (!row) {
-        db.run("INSERT INTO clients VALUES (?)", [discordId]);
+        db.run("INSERT INTO clients VALUES (?, ?)", [discordId, true]);
         return true;
     }
 
@@ -82,6 +84,10 @@ client.on('message', async msg => {
                 || msg.content.trim().toLowerCase().startsWith("switch")) {
                 currentCommands[msg.author.id] = new UseTable(db);
                 currentCommands[msg.author.id].recieve(msg);
+            } else if (msg.content.trim().toLowerCase().startsWith("start")
+                || msg.content.trim().toLowerCase().startsWith("stop")) {
+                currentCommands[msg.author.id] = new StartStopCmd();
+                currentCommands[msg.author.id].recieve(msg);
             } else if (msg.content.trim().toLowerCase().startsWith("add subject")
                 || msg.content.trim().toLowerCase().startsWith("create subject")) {
                 currentCommands[msg.author.id] = new AddSubject(db);
@@ -100,6 +106,10 @@ client.on('message', async msg => {
             } else if (msg.content.toLowerCase().startsWith("delete subject")) {
                 currentCommands[msg.author.id] = new DeleteSubject();
                 currentCommands[msg.author.id].recieve(msg);
+            } else if (msg.content.toLowerCase().startsWith("motd")
+            && secret.static.owners.includes(msg.author.id)) {
+                currentCommands[msg.author.id] = new MotdAdminCommand();
+                currentCommands[msg.author.id].recieve(msg);
             } else if (msg.content.trim().toLowerCase().startsWith("rename table")) {
                 currentCommands[msg.author.id] = new RenameTable(db);
                 currentCommands[msg.author.id].recieve(msg);
@@ -117,6 +127,8 @@ client.on('message', async msg => {
                 currentCommands[msg.author.id].recieve(msg);
             } else if (msg.content.toLowerCase().includes("help")) {
                 msg.channel.send(getHelpEmbed());
+            } else if (msg.content.toLowerCase().includes("about")) {
+                msg.channel.send(getAboutEmbed());
             } else {
                 msg.channel.send(new Discord.MessageEmbed().setColor("#ff2146").setDescription(":no_entry_sign:  **Command not found. Use `HELP` for help.**"));
 
@@ -152,6 +164,9 @@ function getHelpEmbed() {
     \`General\`
     *HELP* - Displays this screen.
     *FEEDBACK* - Ask for support, give me feedback or report bugs.
+    *ABOUT* - Ask for support, give me feedback or report bugs.
+    \u200b
+    \`Notifications\`
     *STOP* - Stops reminding you of your classes.
     *START* - Reactivates reminders.
     \u200b
@@ -160,18 +175,48 @@ function getHelpEmbed() {
     *SWITCH* - Switch between your currently active table
     *INFO* - Display all information about your current table.
     *RENAME TABLE* - Rename the current table.
-    *RENAME SUBJECT* - Rename a subject from the current table.
     *DELETE TABLE* - Delete a table.
-    *DELETE SUBJECT* - Delete a subject.
     \u200b
     \`Table Configuration\`
     *CREATE SUBJECT* - Create a subject.
+    *RENAME SUBJECT* - Rename a subject from the current table.
+    *DELETE SUBJECT* - Delete a subject.
     *ASIGN* - Asign a subject to a school hour.
     *SET LINK* - Set a link for a subject.
     \u200b
     \`Publishing\`
     *IMPORT* - Import a table using an import code.
     *EXPORT* - Export and share your current table and recieve your export code.`);
+
+    embed.addField("\u200b", "\u200b");
+
+    embed.addField("Invite AlfaBot to your server :ballot_box_with_check:", ` Use [this](https://discord.com/oauth2/authorize?client_id=811963323532836966&scope=bot&permissions=0) link to add AlfaBot to your server.`);
+
+
+    return (embed);
+}
+
+function getAboutEmbed() {
+    const embed = new Discord.MessageEmbed().setColor("#f5b042").setTimestamp().setTitle("AlfaBot's Developers :computer: ")
+        .setThumbnail("https://i.imgur.com/ni1gwxv.png");
+
+    embed.setAuthor("About", "https://i.imgur.com/ni1gwxv.png");
+    embed.setFooter("AlfaBot");
+
+    embed.addField("Lopfi :man_mage:",
+        `<@304221361851596802> is the co-developer for AlfaBot.`)
+    embed.addField("P3ntest :watermelon:",
+        `<@357871005093462019> is the founder of AlfaBot.`);
+
+    embed.addField("\u200b", "\u200b");
+
+    embed.addField("Feedback :star:", "Contact developers directly or use the `FEEDBACK` command.");
+
+    embed.addField("Invite AlfaBot to your server :ballot_box_with_check:", `[Invite Link](https://discord.com/oauth2/authorize?client_id=811963323532836966&scope=bot&permissions=0)`);
+    
+    embed.addField("\u200b", "\u200b");
+
+    embed.addField("Buy me a coffee :coffee:", `If you :heart: AflaBot and want to support me, I would be gratefull about donations: [PayPal Link](https://paypal.me/p3ntest)`);
 
 
 
@@ -193,16 +238,17 @@ times.hours.forEach(async hour => {
 });
 
 async function doCronJob(hour) {
-    const day = new Date().getDay();
+    var day = new Date().getDay();
 
     const allEntrys = await db.all("SELECT * FROM timeentry WHERE day=? AND hour=?", [day, hour]);
 
     allEntrys.forEach(async entry => {
         const timetable = entry.timetable;
 
-        const allClients = await db.all("SELECT client FROM activeTable WHERE timetable=?", [timetable]);
+        const client = await db.get(
+            "SELECT activeTable.client FROM activeTable, clients WHERE activeTable.timetable=? AND activeTable.client=clients.discordId AND clients.active=true", [timetable]);
 
-        allClients.forEach(async client => {
+        if (client) {
             const discordId = client.client;
 
             const linkRaw = (await db.get("SELECT link FROM links WHERE timetable=? AND LOWER(subject) LIKE LOWER(?) AND client=?", [entry.timetable, entry.subject, discordId]));
@@ -212,7 +258,8 @@ async function doCronJob(hour) {
                 link = linkRaw.link;
 
             notifyClient(discordId, entry.subject, link);
-        })
+        }
+
     });
 }
 
@@ -220,14 +267,14 @@ function notifyClient(clientId, subject, link) {
     client.users.fetch(clientId).then(user => {
         const embed = new Discord.MessageEmbed().setColor("#eb4034").setTimestamp().setFooter("AlfaBot")
             .setAuthor("You have class in 5 minutes!")
-            
+
 
         embed.addField("Subject", subject, true);
 
         if (link.trim() != "") {
             embed.addField("Link", link, true);
             embed.setURL(link)
-            .setTitle("Click here to join.");
+                .setTitle("Click here to join.");
         }
 
         user.send(`<@${user.id}>`, embed);
