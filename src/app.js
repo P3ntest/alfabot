@@ -3,7 +3,16 @@ const client = new Discord.Client();
 const cron = require('node-cron');
 const Table = require("./utils/table");
 const secret = require("../secret.json");
-
+const times = require("./times.json");
+const UseTable = require('./commands/useTable');
+const Asign = require('./commands/asign');
+const CreateTimeTable = require('./commands/createTimetable');
+const AddSubject = require('./commands/addSubject');
+const Feedback = require('./commands/feedback');
+const ImportCmd = require('./commands/import');
+const RenameCmd = require("./commands/rename");
+const SetLink = require('./commands/setLink');
+const ExportCmd = require('./commands/export');
 const sqlite3 = require('sqlite3').verbose();
 const { open } = require("sqlite");
 
@@ -24,21 +33,6 @@ var db;
 
     global.db = db;
 })()
-
-
-
-const times = require("./times.json");
-
-const UseTable = require('./commands/useTable');
-const Asign = require('./commands/asign');
-const CreateTimeTable = require('./commands/createTimetable');
-const AddSubject = require('./commands/addSubject');
-const Feedback = require('./commands/feedback');
-const ImportCmd = require('./commands/import');
-const RenameCmd = require("./commands/rename");
-const SetLink = require('./commands/setLink');
-const ExportCmd = require('./commands/export');
-
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
@@ -237,11 +231,14 @@ function getHelpEmbed() {
 
     //embed.addField("\u200b", "\u200b");
 
-    embed.addField("Get Started", "Use `IMPORT` to import a table from someone else or `CREATE TABLE` to create your own.");
-
     embed.addField("General Information",
         `AlfaBot helps you with joining the right conference room in time by sending you a reminder with the link 5 minutes prior to your class. ` +
         `You can also share your tables with other who share the same timetable as you. The table will be duplicated and your links will not be shared.`)
+    embed.addField("Setting up your schedule",
+        `1) \`CREATE TABLE\` to create your table
+        2) \`CREATE SUBJECT\` to create your subjects
+        3) \`ASIGN\` to asign your subject to an hour on your schedule
+        4) Done! You will now be notified when you have class.`);
 
     embed.addField("\u200b", "\u200b");
 
