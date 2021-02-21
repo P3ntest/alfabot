@@ -44,6 +44,7 @@ module.exports = class DeleteTable {
 
     async deleteTable(msg, timetable) {
         global.db.run("DELETE FROM timetables WHERE id=?", [timetable.id]);
+        global.db.run("DELETE FROM subjects WHERE timetable=?", [timetable.id]);
         setActiveTimeTable(msg.author.id, "", null)
         msg.channel.send(new Discord.MessageEmbed().setColor("#42f554").setDescription(":white_check_mark: **Deleted table.**"));
         return true;
