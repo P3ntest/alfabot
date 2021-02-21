@@ -19,6 +19,7 @@ const DeleteSubject = require('./commands/deleteSubject');
 const RenameSubject = require('./commands/renameSubject');
 const RenameTable = require('./commands/renameTable');
 const StartStopCmd = require('./commands/startStop');
+const MotdAdminCommand = require('./commands/motd');
 
 var db;
 (async () => {
@@ -41,7 +42,7 @@ var db;
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
-    client.user.setActivity("ur schools stuff", { type: "WATCHING" })
+    client.user.setActivity("AlfaView", { type: "PLAYING" })
     global.client = client;
     doCronJob(1);
 });
@@ -105,6 +106,10 @@ client.on('message', async msg => {
                 currentCommands[msg.author.id].recieve(msg);
             } else if (msg.content.toLowerCase().startsWith("delete subject")) {
                 currentCommands[msg.author.id] = new DeleteSubject();
+                currentCommands[msg.author.id].recieve(msg);
+            } else if (msg.content.toLowerCase().startsWith("motd")
+            && secret.static.owners.includes(msg.author.id)) {
+                currentCommands[msg.author.id] = new MotdAdminCommand();
                 currentCommands[msg.author.id].recieve(msg);
             } else if (msg.content.trim().toLowerCase().startsWith("rename table")) {
                 currentCommands[msg.author.id] = new RenameTable(db);
@@ -184,6 +189,9 @@ function getHelpEmbed() {
     *IMPORT* - Import a table using an import code.
     *EXPORT* - Export and share your current table and recieve your export code.`);
 
+    embed.addField("\u200b", "\u200b");
+
+    embed.addField("Invite AlfaBot to your server :ballot_box_with_check:", ` Use [this](https://discord.com/oauth2/authorize?client_id=811963323532836966&scope=bot&permissions=0) link to add AlfaBot to your server.`);
 
 
     return (embed);
