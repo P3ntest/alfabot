@@ -15,6 +15,7 @@ const InfoCmd = require('./commands/info');
 const ExportCmd = require('./commands/export');
 const sqlite3 = require('sqlite3').verbose();
 const { open } = require("sqlite");
+const DeleteTable = require('./commands/deleteTable');
 
 var db;
 (async () => {
@@ -90,6 +91,9 @@ client.on('message', async msg => {
                 currentCommands[msg.author.id].recieve(msg);
             } else if (msg.content.trim().toLowerCase().startsWith("import")) {
                 currentCommands[msg.author.id] = new ImportCmd(db);
+                currentCommands[msg.author.id].recieve(msg);
+            } else if (msg.content.toLowerCase().startsWith("delete table")) {
+                currentCommands[msg.author.id] = new DeleteTable();
                 currentCommands[msg.author.id].recieve(msg);
             } else if (msg.content.trim().toLowerCase().startsWith("rename")) {
                 currentCommands[msg.author.id] = new RenameCmd(db);

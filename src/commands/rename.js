@@ -2,7 +2,7 @@ const { getActiveTimetable, canEdit, setActiveTimeTable, getNewId } = require(".
 const Discord = require('discord.js');
 const validUrl = require("valid-url");
 
-module.exports = class RenameCmd {
+module.exports = class RenameTable {
     constructor(db) {
         this.db = db;
         this.active = true;

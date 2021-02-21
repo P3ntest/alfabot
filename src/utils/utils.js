@@ -14,8 +14,8 @@ async function canEdit(client, timetable, db) {
 }
 
 async function setActiveTimeTable(client, table, db) {
-    await db.run("DELETE FROM activeTable WHERE client=?", [client]);
-    db.run("INSERT INTO activeTable VALUES (?, ?)", [client, table]);
+    await global.db.run("DELETE FROM activeTable WHERE client=?", [client]);
+    if(table) global.db.run("INSERT INTO activeTable VALUES (?, ?)", [client, table]);
 }
 
 function getNewId() {
