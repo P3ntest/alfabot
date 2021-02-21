@@ -10,6 +10,16 @@ module.exports = class ImportCmd {
         this.client = msg.author.id;
         switch (this.stage) {
             case 0:
+                const existingTables = await global.db.all("SELECT id FROM timetables WHERE owner=?", [msg.author.id]);
+                if (!existingTables) existingTables = [];
+
+                if (existingTables.length > 4) {
+                    msg.channel.send(new Discord.MessageEmbed().setColor("#ff2146").setDescription(
+                        ":no_entry_sign:  **You already have 5 tables. Use `DELETE TABLE` to remove one. Or become a supporter by donating.**"));
+                        this.active = false;
+                        return;
+                }
+                
                 if (msg.content.split(" ").length > 1) {
                     this.code = msg.content.split(" ")[1];
                     this.import(msg);
