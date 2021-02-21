@@ -21,6 +21,8 @@ const RenameTable = require('./commands/renameTable');
 const StartStopCmd = require('./commands/startStop');
 const MotdAdminCommand = require('./commands/motd');
 const UnAsign = require('./commands/unasign');
+const ListTables = require('./commands/listTables');
+const ListSubjectsCmd = require('./commands/listSubjects');
 
 var db;
 (async () => {
@@ -120,6 +122,12 @@ client.on('message', async msg => {
             } else if (msg.content.trim().toLowerCase().startsWith("rename subject")) {
                 currentCommands[msg.author.id] = new RenameSubject(db);
                 currentCommands[msg.author.id].recieve(msg);
+            } else if (msg.content.trim().toLowerCase().startsWith("list tables")) {
+                currentCommands[msg.author.id] = new ListTables();
+                currentCommands[msg.author.id].recieve(msg);
+            } else if (msg.content.trim().toLowerCase().startsWith("list subjects")) {
+                currentCommands[msg.author.id] = new ListSubjectsCmd();
+                currentCommands[msg.author.id].recieve(msg);
             } else if (msg.content.trim().toLowerCase().startsWith("export")) {
                 currentCommands[msg.author.id] = new ExportCmd(db);
                 currentCommands[msg.author.id].recieve(msg);
@@ -177,6 +185,7 @@ function getHelpEmbed() {
     \`Table Management\`
     *CREATE TABLE* - Create a new table.
     *SWITCH* - Switch between your currently active table
+    *LIST TABLES* - List of all your tables
     *INFO* - Display all information about your current table.
     *RENAME TABLE* - Rename the current table.
     *DELETE TABLE* - Delete a table.
@@ -188,6 +197,7 @@ function getHelpEmbed() {
     *CREATE SUBJECT* - Create a subject.
     *RENAME SUBJECT* - Rename a subject from the current table.
     *DELETE SUBJECT* - Delete a subject.
+    *LIST SUBJECTS* - List of all your subjects
     *ASIGN* - Asign a subject to a school hour.
     *UNASIGN* - Remove a class data from the table.
     *SET LINK* - Set a link for a subject.
