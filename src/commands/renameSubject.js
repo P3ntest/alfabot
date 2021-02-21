@@ -45,7 +45,13 @@ module.exports = class RenameSubject {
     }
 
     async renameSubject(msg) {
-        global.db.run("UPDATE subjects SET name=? WHERE timetable=? AND name=?", [this.newname, this.timetable, this.name]);
-        msg.channel.send(new Discord.MessageEmbed().setColor("#42f554").setDescription(":white_check_mark: **Renamed subject.**"));
+        const exists = await this.db.get("SELECT * FROM subjects WHERE timetable=? AND LOWER(name) LIKE LOWER(?)", [this.timetable, this.newname]);
+        if (exists) {
+            msg.channel.send(new Discord.MessageEmbed().setColor("#ff2146").setDescription(":no_entry_sign:  **A subject with that name already exists.**"));
+        } else {
+            global.db.get("SELECT name FROM subjects WHERE timetable=?", [this.timetable]);
+            global.db.run("UPDATE subjects SET name=? WHERE timetable=? AND name=?", [this.newname, this.timetable, this.name]);
+            msg.channel.send(new Discord.MessageEmbed().setColor("#42f554").setDescription(":white_check_mark: **Renamed subject.**"));
+        }
     }
 }
