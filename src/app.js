@@ -18,6 +18,7 @@ const DeleteTable = require('./commands/deleteTable');
 const DeleteSubject = require('./commands/deleteSubject');
 const RenameSubject = require('./commands/renameSubject');
 const RenameTable = require('./commands/renameTable');
+const StartStopCmd = require('./commands/startStop');
 
 var db;
 (async () => {
@@ -31,7 +32,8 @@ var db;
     db.run("CREATE TABLE IF NOT EXISTS links (client TEXT, link TEXT, timetable TEXT, subject TEXT)");
     db.run("CREATE TABLE IF NOT EXISTS timeentry (hour TEXT, day TEXT, subject TEXT, timetable TEXT)");
     db.run("CREATE TABLE IF NOT EXISTS activeTable (client TEXT, timetable TEXT)");
-    db.run("CREATE TABLE IF NOT EXISTS clients (discordId TEXT)");
+    db.run("CREATE TABLE IF NOT EXISTS clients (discordId TEXT, active BOOLEAN)");
+    //SELECT activeTable.timetable FROM activeTable, clients WHERE activeTable.client=clients.discordId AND clients.active=true
     //db.run("CREATE TABLE IF NOT EXISTS imported (client TEXT, timetable TEXT)");
 
     global.db = db;
@@ -40,8 +42,8 @@ var db;
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
     client.user.setActivity("ur schools stuff", { type: "WATCHING" })
-    //doCronJob(1);
     global.client = client;
+    doCronJob(1);
 });
 
 const currentCommands = {};
@@ -50,7 +52,7 @@ async function checkFirstMessage(discordId) {
 
     const row = await db.get("SELECT * FROM clients WHERE discordId=?", [discordId]);
     if (!row) {
-        db.run("INSERT INTO clients VALUES (?)", [discordId]);
+        db.run("INSERT INTO clients VALUES (?, ?)", [discordId, true]);
         return true;
     }
 
@@ -81,6 +83,10 @@ client.on('message', async msg => {
             } else if (msg.content.trim().toLowerCase().startsWith("use")
                 || msg.content.trim().toLowerCase().startsWith("switch")) {
                 currentCommands[msg.author.id] = new UseTable(db);
+                currentCommands[msg.author.id].recieve(msg);
+            } else if (msg.content.trim().toLowerCase().startsWith("start")
+                || msg.content.trim().toLowerCase().startsWith("stop")) {
+                currentCommands[msg.author.id] = new StartStopCmd();
                 currentCommands[msg.author.id].recieve(msg);
             } else if (msg.content.trim().toLowerCase().startsWith("add subject")
                 || msg.content.trim().toLowerCase().startsWith("create subject")) {
@@ -160,12 +166,12 @@ function getHelpEmbed() {
     *SWITCH* - Switch between your currently active table
     *INFO* - Display all information about your current table.
     *RENAME TABLE* - Rename the current table.
-    *RENAME SUBJECT* - Rename a subject from the current table.
     *DELETE TABLE* - Delete a table.
-    *DELETE SUBJECT* - Delete a subject.
     \u200b
     \`Table Configuration\`
     *CREATE SUBJECT* - Create a subject.
+    *RENAME SUBJECT* - Rename a subject from the current table.
+    *DELETE SUBJECT* - Delete a subject.
     *ASIGN* - Asign a subject to a school hour.
     *SET LINK* - Set a link for a subject.
     \u200b
@@ -193,16 +199,18 @@ times.hours.forEach(async hour => {
 });
 
 async function doCronJob(hour) {
-    const day = new Date().getDay();
+    var day = new Date().getDay();
+    day = 1; //////////do this
 
     const allEntrys = await db.all("SELECT * FROM timeentry WHERE day=? AND hour=?", [day, hour]);
 
     allEntrys.forEach(async entry => {
         const timetable = entry.timetable;
 
-        const allClients = await db.all("SELECT client FROM activeTable WHERE timetable=?", [timetable]);
+        const client = await db.get(
+            "SELECT activeTable.client FROM activeTable, clients WHERE activeTable.timetable=? AND activeTable.client=clients.discordId AND clients.active=true", [timetable]);
 
-        allClients.forEach(async client => {
+        if (client) {
             const discordId = client.client;
 
             const linkRaw = (await db.get("SELECT link FROM links WHERE timetable=? AND LOWER(subject) LIKE LOWER(?) AND client=?", [entry.timetable, entry.subject, discordId]));
@@ -212,7 +220,8 @@ async function doCronJob(hour) {
                 link = linkRaw.link;
 
             notifyClient(discordId, entry.subject, link);
-        })
+        }
+
     });
 }
 
@@ -220,14 +229,14 @@ function notifyClient(clientId, subject, link) {
     client.users.fetch(clientId).then(user => {
         const embed = new Discord.MessageEmbed().setColor("#eb4034").setTimestamp().setFooter("AlfaBot")
             .setAuthor("You have class in 5 minutes!")
-            
+
 
         embed.addField("Subject", subject, true);
 
         if (link.trim() != "") {
             embed.addField("Link", link, true);
             embed.setURL(link)
-            .setTitle("Click here to join.");
+                .setTitle("Click here to join.");
         }
 
         user.send(`<@${user.id}>`, embed);
