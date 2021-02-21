@@ -96,7 +96,23 @@ module.exports = class InfoCmd {
                             if (entry) {
                                 currentRow.push(entry.subject);
                             } else {
-                                currentRow.push("");
+                                
+                                if (rows.length > 0 && rows[rows.length - 1][day - 1]) {
+                                    if (row == 2
+                                        || row == 4
+                                        || row == 6) {
+                                            if (rows[rows.length - 1][day - 1]) {
+                                                currentRow.push("(" + rows[rows.length - 1][day - 1] + ")");
+                                            } else {
+                                                currentRow.push("");
+                                            }
+                                           
+                                        } else {
+                                            currentRow.push("");
+                                        }
+                                } else {
+                                    currentRow.push("");
+                                }
                             }
 
                         }
