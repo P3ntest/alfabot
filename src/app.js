@@ -123,6 +123,8 @@ client.on('message', async msg => {
                 currentCommands[msg.author.id].recieve(msg);
             } else if (msg.content.toLowerCase().includes("help")) {
                 msg.channel.send(getHelpEmbed());
+            } else if (msg.content.toLowerCase().includes("about")) {
+                msg.channel.send(getAboutEmbed());
             } else {
                 msg.channel.send(new Discord.MessageEmbed().setColor("#ff2146").setDescription(":no_entry_sign:  **Command not found. Use `HELP` for help.**"));
 
@@ -158,6 +160,9 @@ function getHelpEmbed() {
     \`General\`
     *HELP* - Displays this screen.
     *FEEDBACK* - Ask for support, give me feedback or report bugs.
+    *ABOUT* - Ask for support, give me feedback or report bugs.
+    \u200b
+    \`Notifications\`
     *STOP* - Stops reminding you of your classes.
     *START* - Reactivates reminders.
     \u200b
@@ -178,6 +183,33 @@ function getHelpEmbed() {
     \`Publishing\`
     *IMPORT* - Import a table using an import code.
     *EXPORT* - Export and share your current table and recieve your export code.`);
+
+
+
+    return (embed);
+}
+
+function getAboutEmbed() {
+    const embed = new Discord.MessageEmbed().setColor("#f5b042").setTimestamp().setTitle("AlfaBot's Developers :computer: ")
+        .setThumbnail("https://i.imgur.com/ni1gwxv.png");
+
+    embed.setAuthor("About", "https://i.imgur.com/ni1gwxv.png");
+    embed.setFooter("AlfaBot");
+
+    embed.addField("Lopfi :man_mage:",
+        `<@304221361851596802> is the co-developer for AlfaBot.`)
+    embed.addField("P3ntest :watermelon:",
+        `<@357871005093462019> is the founder of AlfaBot.`);
+
+    embed.addField("\u200b", "\u200b");
+
+    embed.addField("Feedback :star:", "Contact developers directly or use the `FEEDBACK` command.");
+
+    embed.addField("Invite AlfaBot to your server :ballot_box_with_check:", `[Invite Link](https://discord.com/oauth2/authorize?client_id=811963323532836966&scope=bot&permissions=0)`);
+    
+    embed.addField("\u200b", "\u200b");
+
+    embed.addField("Buy me a coffee :coffee:", `If you :heart: AflaBot and want to support me, I would be gratefull about donations: [PayPal Link](https://paypal.me/p3ntest)`);
 
 
 
