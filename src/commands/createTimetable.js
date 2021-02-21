@@ -43,6 +43,12 @@ module.exports = class CreateTimeTable {
     }
 
     async add(client, msg) {
+        const existing = await global.db.get("SELECT id FROM timetables WHERE owner=? AND LOWER(name) LIKE LOWER(?)", [msg.author.id, this.name]);
+        if (existing) {
+            msg.channel.send(new Discord.MessageEmbed().setColor("#ff2146").setDescription(":no_entry_sign:  **A table with the same name already exists.**"));
+            return;
+        }
+
         msg.channel.send(new Discord.MessageEmbed().setColor("#42f554").setDescription(`:white_check_mark: **Created timetable ${this.name}.**`));
         const id = getNewId();
         this.db.run("INSERT INTO timetables VALUES (?, ?, ?)", [client, id, this.name]);

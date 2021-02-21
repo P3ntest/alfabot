@@ -39,6 +39,11 @@ module.exports = class RenameTable {
     }
 
     async renameTable(msg) {
+        const existing = await global.db.get("SELECT id FROM timetables WHERE owner=? AND LOWER(name) LIKE LOWER(?)", [msg.author.id, this.name]);
+        if (existing) {
+            msg.channel.send(new Discord.MessageEmbed().setColor("#ff2146").setDescription(":no_entry_sign:  **A table with the same name already exists.**"));
+            return;
+        }
         global.db.run("UPDATE timetables SET name=? WHERE id=?", [this.name, this.timetable]);
         msg.channel.send(new Discord.MessageEmbed().setColor("#42f554").setDescription(":white_check_mark: **Renamed table.**"));
     }

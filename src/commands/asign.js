@@ -1,4 +1,4 @@
-const { getActiveTimetable, canEdit } = require("../utils/utils");
+const { getActiveTimetable, canEdit, getNumberApprending } = require("../utils/utils");
 const Discord = require('discord.js');
 
 module.exports = class Asign {
@@ -70,7 +70,7 @@ module.exports = class Asign {
                         await this.db.run("DELETE FROM timeentry WHERE hour=? AND day=? AND timetable=?", [this.hour, this.day, this.timetable]);
                         msg.channel.send(new Discord.MessageEmbed().setColor("#f5b042").setDescription(":information_source: **Removed old subject.**"));
                     }
-                    msg.channel.send(new Discord.MessageEmbed().setColor("#42f554").setDescription(`:white_check_mark: **Asigned ${this.subject} to the ${this.hour}nth hour on ${this.displayDay}**`));
+                    msg.channel.send(new Discord.MessageEmbed().setColor("#42f554").setDescription(`:white_check_mark: **Asigned ${this.subject} to the ${this.hour}${getNumberApprending(this.hour)} hour on ${this.displayDay}**`));
                     await this.db.run("INSERT INTO timeentry VALUES (?, ?, ?, ?)", [this.hour, this.day, this.subject, this.timetable]);
                     
 

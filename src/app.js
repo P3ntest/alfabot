@@ -20,6 +20,7 @@ const RenameSubject = require('./commands/renameSubject');
 const RenameTable = require('./commands/renameTable');
 const StartStopCmd = require('./commands/startStop');
 const MotdAdminCommand = require('./commands/motd');
+const UnAsign = require('./commands/unasign');
 
 var db;
 (async () => {
@@ -73,6 +74,9 @@ client.on('message', async msg => {
         } else {
             if (msg.content.trim().toLowerCase().startsWith("asign")) {
                 currentCommands[msg.author.id] = new Asign(db);
+                currentCommands[msg.author.id].recieve(msg);
+            } else if (msg.content.trim().toLowerCase().startsWith("unasign")) {
+                currentCommands[msg.author.id] = new UnAsign();
                 currentCommands[msg.author.id].recieve(msg);
             } else if (msg.content.trim().toLowerCase().startsWith("create table")
                 || msg.content.trim().toLowerCase().startsWith("add table")
@@ -176,12 +180,16 @@ function getHelpEmbed() {
     *INFO* - Display all information about your current table.
     *RENAME TABLE* - Rename the current table.
     *DELETE TABLE* - Delete a table.
-    \u200b
+    `)
+    embed.addField("\u200b",
+
+    `
     \`Table Configuration\`
     *CREATE SUBJECT* - Create a subject.
     *RENAME SUBJECT* - Rename a subject from the current table.
     *DELETE SUBJECT* - Delete a subject.
     *ASIGN* - Asign a subject to a school hour.
+    *UNASIGN* - Remove a class data from the table.
     *SET LINK* - Set a link for a subject.
     \u200b
     \`Publishing\`
