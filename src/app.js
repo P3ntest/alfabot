@@ -9,7 +9,6 @@ const CreateTimeTable = require('./commands/createTimetable');
 const AddSubject = require('./commands/addSubject');
 const Feedback = require('./commands/feedback');
 const ImportCmd = require('./commands/import');
-const RenameCmd = require("./commands/renameTable");
 const SetLink = require('./commands/setLink');
 const InfoCmd = require('./commands/info');
 const ExportCmd = require('./commands/export');
@@ -17,6 +16,8 @@ const sqlite3 = require('sqlite3').verbose();
 const { open } = require("sqlite");
 const DeleteTable = require('./commands/deleteTable');
 const DeleteSubject = require('./commands/deleteSubject');
+const RenameSubject = require('./commands/renameSubject');
+const RenameTable = require('./commands/renameTable');
 
 var db;
 (async () => {
@@ -100,7 +101,10 @@ client.on('message', async msg => {
                 currentCommands[msg.author.id] = new DeleteSubject();
                 currentCommands[msg.author.id].recieve(msg);
             } else if (msg.content.trim().toLowerCase().startsWith("rename table")) {
-                currentCommands[msg.author.id] = new RenameCmd(db);
+                currentCommands[msg.author.id] = new RenameTable(db);
+                currentCommands[msg.author.id].recieve(msg);
+            } else if (msg.content.trim().toLowerCase().startsWith("rename subject")) {
+                currentCommands[msg.author.id] = new RenameSubject(db);
                 currentCommands[msg.author.id].recieve(msg);
             } else if (msg.content.trim().toLowerCase().startsWith("export")) {
                 currentCommands[msg.author.id] = new ExportCmd(db);
