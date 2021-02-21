@@ -205,6 +205,7 @@ function getHelpEmbed() {
     *ASIGN* - Asign a subject to a school hour.
     *UNASIGN* - Remove a class data from the table.
     *SET LINK* - Set a link for a subject.
+    *LINK <subject>* - View a link for a subject.
     \u200b
     \`Publishing\`
     *IMPORT* - Import a table using an import code.
