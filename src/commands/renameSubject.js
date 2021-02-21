@@ -2,7 +2,7 @@ const { getActiveTimetable, canEdit, setActiveTimeTable, getNewId } = require(".
 const Discord = require('discord.js');
 const validUrl = require("valid-url");
 
-module.exports = class RenameTable {
+module.exports = class RenameSubject {
     constructor(db) {
         this.db = db;
         this.active = true;
@@ -18,28 +18,34 @@ module.exports = class RenameTable {
                     return;
                 }
                 this.timetable = timetable;
-                if (msg.content.split(" ").length > 1) {
+                if (msg.content.split(" ").length > 2) {
 
-                    this.name = msg.content.split(" ")[1];
+                    this.name = msg.content.split(" ")[2];
 
-                    this.rename(msg);
+                    this.renameSubject(msg);
                     this.active = false;
                 } else {
-                    msg.channel.send(new Discord.MessageEmbed().setColor("#5cd1ff").setDescription(":question: **Please respond with the new name.**"));
+                    msg.channel.send(new Discord.MessageEmbed().setColor("#5cd1ff").setDescription(":question: **Please respond with the name of the subject you want to rename.**"));
                     this.stage = 1;
                 }
                 break;
             case 1:
                 this.name = msg.content;
 
-                this.rename(msg);
-                this.active = false;
+                msg.channel.send(new Discord.MessageEmbed().setColor("#5cd1ff").setDescription(":question: **Please respond with the new name.**"));
+                this.stage = 2;
                 break;
+            case 2:
+            this.newname = msg.content;
+
+            this.renameSubject(msg);
+            this.active = false;
+            break;
         }
     }
 
-    async rename(msg) {
-        global.db.run("UPDATE timetables SET name=? WHERE id=?", [this.name, this.timetable]);
-        msg.channel.send(new Discord.MessageEmbed().setColor("#42f554").setDescription(":white_check_mark: **Renamed table.**"));
+    async renameSubject(msg) {
+        global.db.run("UPDATE subjects SET name=? WHERE timetable=? AND name=?", [this.newname, this.timetable, this.name]);
+        msg.channel.send(new Discord.MessageEmbed().setColor("#42f554").setDescription(":white_check_mark: **Renamed subject.**"));
     }
 }
