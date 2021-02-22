@@ -54,10 +54,9 @@ module.exports = class InfoCmd {
 
                             subjectsString += "`" + subject.name + "`";
 
-                            addedLenght += subject.name.length + link.link.length;
-
                             if (link) {
                                 subjectsString += " **-** " + link.link;
+                                addedLenght += subject.name.length + link.link.length;
                             }
 
                             subjectsString += "\n";
