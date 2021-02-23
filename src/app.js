@@ -1,29 +1,20 @@
+const cron = require('node-cron');
 const Discord = require('discord.js');
 const client = new Discord.Client();
-const cron = require('node-cron');
-const secret = require("../secret.json");
-const times = require("./times.json");
-const UseTable = require('./commands/useTable');
-const Assign = require('./commands/assign');
-const CreateTimeTable = require('./commands/createTimetable');
-const AddSubject = require('./commands/addSubject');
-const Feedback = require('./commands/feedback');
-const ImportCmd = require('./commands/import');
-const SetLink = require('./commands/setLink');
-const InfoCmd = require('./commands/info');
-const ExportCmd = require('./commands/export');
+const fs = require('fs');
 const sqlite3 = require('sqlite3').verbose();
 const { open } = require("sqlite");
-const DeleteTable = require('./commands/deleteTable');
-const DeleteSubject = require('./commands/deleteSubject');
-const RenameSubject = require('./commands/renameSubject');
-const RenameTable = require('./commands/renameTable');
-const StartStopCmd = require('./commands/startStop');
-const MotdAdminCommand = require('./commands/motd');
-const UnAssign = require('./commands/unassign');
-const ListTables = require('./commands/listTables');
-const ListSubjectsCmd = require('./commands/listSubjects');
-const GetLink = require('./commands/link');
+
+const secret = require("../secret.json");
+const times = require("./times.json");
+
+const commands = fs.readFileSync('./commands');
+client.commands = new Discord.Collection();
+
+for(const file of commands){
+    const command = require(`./commands/${file}`);
+    client.commands.set(command.name, command);
+}
 
 var db;
 (async () => {
@@ -52,104 +43,32 @@ client.on('ready', () => {
 
 const currentCommands = {};
 
-async function checkFirstMessage(discordId) {
-
+async function setupNewUser(discordId) {
     const row = await db.get("SELECT * FROM clients WHERE discordId=?", [discordId]);
     if (!row) {
         db.run("INSERT INTO clients VALUES (?, ?)", [discordId, true]);
-        return true;
     }
-
-    return false;
 }
 
 client.on('message', async msg => {
-    if (msg.channel.type == "dm" && !msg.author.bot) {
-        if (await checkFirstMessage(msg.author.id)) {
-            msg.channel.send(`<@${msg.author.id}> welcome to AlfaBot! Here is our help page to get you started:`, getHelpEmbed());
-            return;
-        }
-        if (msg.content.trim() == "cancel") {
-            currentCommands[msg.author.id] = undefined;
-            msg.react("👍");
-        } else if (currentCommands[msg.author.id] && currentCommands[msg.author.id].active) {
-            currentCommands[msg.author.id].recieve(msg);
-        } else {
-            if (msg.content.trim().toLowerCase().startsWith("assign")) {
-                currentCommands[msg.author.id] = new Assign(db);
-                currentCommands[msg.author.id].recieve(msg);
-            } else if (msg.content.trim().toLowerCase().startsWith("unassign")) {
-                currentCommands[msg.author.id] = new UnAssign();
-                currentCommands[msg.author.id].recieve(msg);
-            } else if (msg.content.trim().toLowerCase().startsWith("create table")
-                || msg.content.trim().toLowerCase().startsWith("add table")
-                || msg.content.trim().toLowerCase().startsWith("create timetable")
-                || msg.content.trim().toLowerCase().startsWith("add timetable")) {
-                currentCommands[msg.author.id] = new CreateTimeTable(db);
-                currentCommands[msg.author.id].recieve(msg);
-            } else if (msg.content.trim().toLowerCase().startsWith("use")
-                || msg.content.trim().toLowerCase().startsWith("switch")) {
-                currentCommands[msg.author.id] = new UseTable(db);
-                currentCommands[msg.author.id].recieve(msg);
-            } else if (msg.content.trim().toLowerCase().startsWith("start")
-                || msg.content.trim().toLowerCase().startsWith("stop")) {
-                currentCommands[msg.author.id] = new StartStopCmd();
-                currentCommands[msg.author.id].recieve(msg);
-            } else if (msg.content.trim().toLowerCase().startsWith("add subject")
-                || msg.content.trim().toLowerCase().startsWith("create subject")) {
-                currentCommands[msg.author.id] = new AddSubject(db);
-                currentCommands[msg.author.id].recieve(msg);
-            } else if (msg.content.trim().toLowerCase().startsWith("feedback")
-                || msg.content.trim().toLowerCase().startsWith("review")
-                || msg.content.trim().toLowerCase().startsWith("support")) {
-                currentCommands[msg.author.id] = new Feedback(db);
-                currentCommands[msg.author.id].recieve(msg);
-            } else if (msg.content.trim().toLowerCase().startsWith("import")) {
-                currentCommands[msg.author.id] = new ImportCmd(db);
-                currentCommands[msg.author.id].recieve(msg);
-            } else if (msg.content.trim().toLowerCase().startsWith("link")) {
-                currentCommands[msg.author.id] = new GetLink();
-                currentCommands[msg.author.id].recieve(msg);
-            } else if (msg.content.toLowerCase().startsWith("delete table")) {
-                currentCommands[msg.author.id] = new DeleteTable();
-                currentCommands[msg.author.id].recieve(msg);
-            } else if (msg.content.toLowerCase().startsWith("delete subject")) {
-                currentCommands[msg.author.id] = new DeleteSubject();
-                currentCommands[msg.author.id].recieve(msg);
-            } else if (msg.content.toLowerCase().startsWith("motd")
-            && secret.static.owners.includes(msg.author.id)) {
-                currentCommands[msg.author.id] = new MotdAdminCommand();
-                currentCommands[msg.author.id].recieve(msg);
-            } else if (msg.content.trim().toLowerCase().startsWith("rename table")) {
-                currentCommands[msg.author.id] = new RenameTable(db);
-                currentCommands[msg.author.id].recieve(msg);
-            } else if (msg.content.trim().toLowerCase().startsWith("rename subject")) {
-                currentCommands[msg.author.id] = new RenameSubject(db);
-                currentCommands[msg.author.id].recieve(msg);
-            } else if (msg.content.trim().toLowerCase().startsWith("list tables")) {
-                currentCommands[msg.author.id] = new ListTables();
-                currentCommands[msg.author.id].recieve(msg);
-            } else if (msg.content.trim().toLowerCase().startsWith("list subjects")) {
-                currentCommands[msg.author.id] = new ListSubjectsCmd();
-                currentCommands[msg.author.id].recieve(msg);
-            } else if (msg.content.trim().toLowerCase().startsWith("export")) {
-                currentCommands[msg.author.id] = new ExportCmd(db);
-                currentCommands[msg.author.id].recieve(msg);
-            } else if (msg.content.trim().toLowerCase().startsWith("set link")) {
-                currentCommands[msg.author.id] = new SetLink(db);
-                currentCommands[msg.author.id].recieve(msg);
-            } else if (msg.content.toLowerCase().startsWith("info")) {
-                currentCommands[msg.author.id] = new InfoCmd();
-                currentCommands[msg.author.id].recieve(msg);
-            } else if (msg.content.toLowerCase().includes("help")) {
-                msg.channel.send(getHelpEmbed());
-            } else if (msg.content.toLowerCase().includes("about")) {
-                msg.channel.send(getAboutEmbed());
-            } else {
-                msg.channel.send(new Discord.MessageEmbed().setColor("#ff2146").setDescription(":no_entry_sign:  **Command not found. Use `HELP` for help.**"));
+    if(msg.channel.type == "dm" && !msg.author.bot) return;
 
-            }
-        }
+    if(!msg.channel.lastMessage) { //Prüfen ob es eine Nachricht vor der jetzigen gegeben hat. Spaart Datenbank abrufe
+        msg.channel.send(`<@${msg.author.id}> welcome to AlfaBot! Here is our help page to get you started:`, getHelpEmbed());
+        await setupNewUser(msg.author.id);
+        return;
+    }
+    const commandName = content.trim().toLowerCase();
+    const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+
+    if(!command) return; //Wenn kein Command gefunden wird
+    //Hier kann man beschränkungen prüfen, wie zum Beispiel ob argumente benötigt werden, Cooldowns usw usw...
+
+    try {
+        command.execute(msg, args = undefined, db);
+    } catch (error) {
+        console.error(error);
+        msg.reply('An error Occured!');
     }
 
 });
