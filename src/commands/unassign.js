@@ -1,7 +1,7 @@
 const { getActiveTimetable, canEdit, getNumberApprending } = require("../utils/utils");
 const Discord = require('discord.js');
 
-module.exports = class UnAsign {
+module.exports = class UnAssign {
     constructor() {
         this.active = true;
         this.stage = 0;
@@ -39,7 +39,7 @@ module.exports = class UnAsign {
                     this.stage = 2;
                     this.day = day;
                     this.displayDay = disp;
-                    msg.channel.send(new Discord.MessageEmbed().setColor("#5cd1ff").setDescription(":question:   **What hour do you want to unasign?**"));
+                    msg.channel.send(new Discord.MessageEmbed().setColor("#5cd1ff").setDescription(":question:   **What hour do you want to unassign?**"));
                 } else {
                     msg.channel.send(new Discord.MessageEmbed().setColor("#ff2146").setDescription(":no_entry_sign:  **Invalid day. Examples: Mon, Monday, 1**"));
                     return;
@@ -52,7 +52,7 @@ module.exports = class UnAsign {
                     this.hour = hour;
 
                     await global.db.run("DELETE FROM timeentry WHERE timetable=? AND day=? AND hour=?", [this.timetable, this.day, this.hour]);
-                    msg.channel.send(new Discord.MessageEmbed().setColor("#42f554").setDescription(`:white_check_mark: **Unasign the ${this.hour}${getNumberApprending(this.hour)} hour on ${this.displayDay}**`));
+                    msg.channel.send(new Discord.MessageEmbed().setColor("#42f554").setDescription(`:white_check_mark: **Unassigned the ${this.hour}${getNumberApprending(this.hour)} hour on ${this.displayDay}**`));
 
 
                     this.active = false;

@@ -4,7 +4,7 @@ const cron = require('node-cron');
 const secret = require("../secret.json");
 const times = require("./times.json");
 const UseTable = require('./commands/useTable');
-const Asign = require('./commands/asign');
+const Assign = require('./commands/assign');
 const CreateTimeTable = require('./commands/createTimetable');
 const AddSubject = require('./commands/addSubject');
 const Feedback = require('./commands/feedback');
@@ -20,7 +20,7 @@ const RenameSubject = require('./commands/renameSubject');
 const RenameTable = require('./commands/renameTable');
 const StartStopCmd = require('./commands/startStop');
 const MotdAdminCommand = require('./commands/motd');
-const UnAsign = require('./commands/unasign');
+const UnAssign = require('./commands/unassign');
 const ListTables = require('./commands/listTables');
 const ListSubjectsCmd = require('./commands/listSubjects');
 const GetLink = require('./commands/link');
@@ -75,11 +75,11 @@ client.on('message', async msg => {
         } else if (currentCommands[msg.author.id] && currentCommands[msg.author.id].active) {
             currentCommands[msg.author.id].recieve(msg);
         } else {
-            if (msg.content.trim().toLowerCase().startsWith("asign")) {
-                currentCommands[msg.author.id] = new Asign(db);
+            if (msg.content.trim().toLowerCase().startsWith("assign")) {
+                currentCommands[msg.author.id] = new Assign(db);
                 currentCommands[msg.author.id].recieve(msg);
-            } else if (msg.content.trim().toLowerCase().startsWith("unasign")) {
-                currentCommands[msg.author.id] = new UnAsign();
+            } else if (msg.content.trim().toLowerCase().startsWith("unassign")) {
+                currentCommands[msg.author.id] = new UnAssign();
                 currentCommands[msg.author.id].recieve(msg);
             } else if (msg.content.trim().toLowerCase().startsWith("create table")
                 || msg.content.trim().toLowerCase().startsWith("add table")
@@ -169,7 +169,7 @@ function getHelpEmbed() {
     embed.addField("Setting up your schedule",
         `1) \`CREATE TABLE\` to create your table
         2) \`CREATE SUBJECT\` to create your subjects
-        3) \`ASIGN\` to asign your subject to an hour on your schedule
+        3) \`ASSIGN\` to assign your subject to an hour on your schedule
         4) Done! You will now be notified when you have class.`);
 
     embed.addField("\u200b", "\u200b");
@@ -202,8 +202,8 @@ function getHelpEmbed() {
     *RENAME SUBJECT* - Rename a subject from the current table.
     *DELETE SUBJECT* - Delete a subject.
     *LIST SUBJECTS* - List of all your subjects
-    *ASIGN* - Asign a subject to a school hour.
-    *UNASIGN* - Remove a class data from the table.
+    *ASSIGN* - Assign a subject to a school hour.
+    *UNASSIGN* - Remove a class data from the table.
     *SET LINK* - Set a link for a subject.
     *LINK <subject>* - View a link for a subject.
     \u200b
